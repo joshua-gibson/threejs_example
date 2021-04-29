@@ -1,9 +1,33 @@
+function getBoxGrid(amount, separationMultiplier) {
+  var group = new THREE.Group();
+
+  for (var i = 0; i < amount; i++) {
+    var obj = getBox(1, 1, 1);
+    obj.position.x = i * separationMultiplier;
+    obj.position.y = obj.geometry.parameters.height / 2;
+    group.add(obj);
+    for (var j = 1; j < amount; j++) {
+      var obj = getBox(1, 1, 1);
+      obj.position.x = i * separationMultiplier;
+      obj.position.y = obj.geometry.parameters.height / 2;
+      obj.position.z = j * separationMultiplier;
+      group.add(obj);
+    }
+  }
+
+  group.position.x = -(separationMultiplier * (amount - 1)) / 2;
+  group.position.z = -(separationMultiplier * (amount - 1)) / 2;
+
+  return group;
+}
+
 const getBox = (w, h, d) => {
   var geometry = new THREE.BoxGeometry(w, h, d);
   var material = new THREE.MeshPhongMaterial({
     color: "rgb(120,120,120)",
   });
   var mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
   return mesh;
 };
 
@@ -23,11 +47,13 @@ const getPlane = (size) => {
     side: THREE.DoubleSide,
   });
   var mesh = new THREE.Mesh(geometry, material);
+  mesh.receiveShadow = true;
   return mesh;
 };
 
 const getPointLight = (intensity) => {
   var light = new THREE.PointLight(0xffffff, intensity);
+  light.castShadow = true;
   return light;
 };
 
@@ -49,24 +75,24 @@ const init = () => {
   if (enableFog) {
     scene.fog = new THREE.FogExp2(0xfffff, 0.2);
   }
-  var box = getBox(1, 1, 1);
-  var plane = getPlane(20);
+
+  var plane = getPlane(30);
   var pointLight = getPointLight(1);
   var sphere = getSphere(0.05);
+  var boxGrid = getBoxGrid(10, 1.5);
   plane.name = "plane-1";
 
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
   pointLight.position.y = 2;
   pointLight.intensity = 2;
-  box.position.y = box.geometry.parameters.height / 2;
 
   gui.add(pointLight, "intensity", 0, 10);
   gui.add(pointLight.position, "y", 0, 5);
 
   scene.add(plane);
-  scene.add(box);
   scene.add(pointLight);
+  scene.add(boxGrid);
   pointLight.add(sphere);
 
   var camera = new THREE.PerspectiveCamera(
@@ -82,6 +108,7 @@ const init = () => {
   camera.lookAt(new THREE.Vector3(0, 0, 0)); //look at the center of the scene
 
   var renderer = new THREE.WebGLRenderer();
+  renderer.shadowMap.enabled = true;
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor("rgb(120, 120, 120)");
   document.getElementById("webgl").appendChild(renderer.domElement);
