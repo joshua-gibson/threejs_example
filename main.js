@@ -57,6 +57,15 @@ const getPointLight = (intensity) => {
   return light;
 };
 
+const getSpotLight = (intensity) => {
+  var light = new THREE.SpotLight(0xffffff, intensity);
+  light.castShadow = true;
+  light.shadow.bias = 0.001;
+  light.shadow.mapSize.width = 2048;
+  light.shadow.mapSize.height = 2048;
+  return light;
+};
+
 //recursively call itself so as to allow for interactivity
 const update = (renderer, scene, camera, controls) => {
   renderer.render(scene, camera);
@@ -77,23 +86,26 @@ const init = () => {
   }
 
   var plane = getPlane(30);
-  var pointLight = getPointLight(1);
+  var spotLight = getSpotLight(1);
   var sphere = getSphere(0.05);
   var boxGrid = getBoxGrid(10, 1.5);
   plane.name = "plane-1";
 
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
-  pointLight.position.y = 2;
-  pointLight.intensity = 2;
+  spotLight.position.y = 4;
+  spotLight.intensity = 2;
 
-  gui.add(pointLight, "intensity", 0, 10);
-  gui.add(pointLight.position, "y", 0, 5);
+  gui.add(spotLight, "intensity", 0, 10);
+  gui.add(spotLight.position, "y", 0, 20);
+  gui.add(spotLight.position, "x", 0, 20);
+  gui.add(spotLight.position, "z", 0, 20);
+  gui.add(spotLight, "penumbra", 0, 1);
 
   scene.add(plane);
-  scene.add(pointLight);
+  scene.add(spotLight);
   scene.add(boxGrid);
-  pointLight.add(sphere);
+  spotLight.add(sphere);
 
   var camera = new THREE.PerspectiveCamera(
     45,
