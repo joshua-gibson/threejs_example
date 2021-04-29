@@ -66,6 +66,16 @@ const getSpotLight = (intensity) => {
   return light;
 };
 
+const getDirectionalLight = (intensity) => {
+  var light = new THREE.DirectionalLight(0xffffff, intensity);
+  light.castShadow = true;
+  light.shadow.camera.left = -10;
+  light.shadow.camera.bottom = -10;
+  light.shadow.camera.right = 10;
+  light.shadow.camera.top = 10;
+  return light;
+};
+
 //recursively call itself so as to allow for interactivity
 const update = (renderer, scene, camera, controls) => {
   renderer.render(scene, camera);
@@ -87,25 +97,29 @@ const init = () => {
 
   var plane = getPlane(30);
   var spotLight = getSpotLight(1);
+  var directionalLight = getDirectionalLight(1);
   var sphere = getSphere(0.05);
   var boxGrid = getBoxGrid(10, 1.5);
+  //the shadows are cast by a 'shadow camera', which has its own field of view which may not be sufficient
+  var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
   plane.name = "plane-1";
 
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
-  spotLight.position.y = 4;
-  spotLight.intensity = 2;
+  directionalLight.position.y = 4;
+  directionalLight.intensity = 2;
 
-  gui.add(spotLight, "intensity", 0, 10);
-  gui.add(spotLight.position, "y", 0, 20);
-  gui.add(spotLight.position, "x", 0, 20);
-  gui.add(spotLight.position, "z", 0, 20);
-  gui.add(spotLight, "penumbra", 0, 1);
+  gui.add(directionalLight, "intensity", 0, 10);
+  gui.add(directionalLight.position, "y", 0, 20);
+  gui.add(directionalLight.position, "x", 0, 20);
+  gui.add(directionalLight.position, "z", 0, 20);
+  // gui.add(directionalLight, "penumbra", 0, 1);
 
   scene.add(plane);
-  scene.add(spotLight);
+  scene.add(directionalLight);
   scene.add(boxGrid);
-  spotLight.add(sphere);
+  directionalLight.add(sphere);
+  scene.add(helper);
 
   var camera = new THREE.PerspectiveCamera(
     45,
