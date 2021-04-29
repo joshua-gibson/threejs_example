@@ -87,15 +87,13 @@ const getDirectionalLight = (intensity) => {
 //recursively call itself so as to allow for interactivity
 const update = (renderer, scene, camera, controls, clock) => {
   renderer.render(scene, camera);
+
+  controls.update();
+  TWEEN.update();
+
   var timeElapsed = clock.getElapsedTime();
 
-  var cameraXRotation = scene.getObjectByName("cameraXRotation");
-  if (cameraXRotation.rotation.x < 0) {
-    cameraXRotation.rotation.x += 0.01;
-  }
-  var cameraZPosition = scene.getObjectByName("cameraZPosition");
   var cameraZRotation = scene.getObjectByName("cameraZRotation");
-  cameraZPosition.position.z -= 0.25;
   cameraZRotation.rotation.z = noise.simplex2(
     timeElapsed * 0.02,
     timeElapsed * 0.02
@@ -107,7 +105,6 @@ const update = (renderer, scene, camera, controls, clock) => {
     child.scale.y = (noise.simplex2(x, x) + 1) / 2 + 0.001;
     child.position.y = child.scale.y / 2;
   });
-  controls.update();
 
   requestAnimationFrame(() => {
     update(renderer, scene, camera, controls, clock);
@@ -178,6 +175,31 @@ const init = () => {
   cameraXRotation.rotation.x = -Math.PI / 2;
   cameraYPosition.position.y = 1;
   cameraZPosition.position.z = 100;
+
+  new TWEEN.Tween({ val: 100 })
+    .to({ val: -50 }, 12000)
+    .onUpdate(function () {
+      cameraZPosition.position.z = this.val;
+    })
+    .start();
+
+  new TWEEN.Tween({ val: -Math.PI / 2 })
+    .to({ val: 0 }, 6000)
+    .delay(1000)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(function () {
+      cameraXRotation.rotation.x = this.val;
+    })
+    .start();
+
+  new TWEEN.Tween({ val: 0 })
+    .to({ val: Math.PI / 2 }, 6000)
+    .delay(1000)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(function () {
+      cameraYRotation.rotation.y = this.val;
+    })
+    .start();
 
   gui.add(cameraZPosition.position, "z", 0, 100);
   gui.add(cameraYRotation.rotation, "y", -Math.PI, Math.PI);
