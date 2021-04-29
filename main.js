@@ -32,16 +32,18 @@ const getPointLight = (intensity) => {
 };
 
 //recursively call itself so as to allow for interactivity
-const update = (renderer, scene, camera) => {
+const update = (renderer, scene, camera, controls) => {
   renderer.render(scene, camera);
 
+  controls.update();
   requestAnimationFrame(() => {
-    update(renderer, scene, camera);
+    update(renderer, scene, camera, controls);
   });
 };
 
 const init = () => {
   var scene = new THREE.Scene();
+  var gui = new dat.GUI();
 
   var enableFog = false;
   if (enableFog) {
@@ -56,7 +58,11 @@ const init = () => {
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
   pointLight.position.y = 2;
+  pointLight.intensity = 2;
   box.position.y = box.geometry.parameters.height / 2;
+
+  gui.add(pointLight, "intensity", 0, 10);
+  gui.add(pointLight.position, "y", 0, 5);
 
   scene.add(plane);
   scene.add(box);
@@ -79,7 +85,10 @@ const init = () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor("rgb(120, 120, 120)");
   document.getElementById("webgl").appendChild(renderer.domElement);
-  update(renderer, scene, camera);
+
+  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  update(renderer, scene, camera, controls);
 
   return scene;
 };

@@ -1,20 +1,13 @@
-const express = require("express");
+var path = require("path");
+var express = require("express");
+var app = express();
 
-const app = express();
+var htmlPath = path.join(__dirname, "./");
 
-const PORT = process.env.PORT || 4000;
+app.use(express.static(htmlPath));
 
-app.get("/", function (request, res) {
-  res.contentType("html");
-  res.sendFile(__dirname + "/index.html");
+var server = app.listen(4000, function () {
+  var host = "localhost";
+  var port = server.address().port;
+  console.log("listening on http://" + host + ":" + port + "/");
 });
-
-app.get("/main.js", function (req, res) {
-  res.sendFile(__dirname + "/main.js");
-});
-
-app.get("/lib/three.js", function (req, res) {
-  res.sendFile(__dirname + "/lib/three.js");
-});
-
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
