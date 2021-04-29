@@ -17,19 +17,38 @@ const getPlane = (size) => {
   return mesh;
 };
 
+//recursively call itself so as to allow for interactivity
+const update = (renderer, scene, camera) => {
+  renderer.render(scene, camera);
+
+  var plane = scene.getObjectByName("plane-1");
+  plane.rotation.y += 0.001;
+  plane.rotation.z += 0.001;
+
+  scene.traverse((child) => {
+    child.scale.x += 0.001;
+  });
+
+  requestAnimationFrame(() => {
+    update(renderer, scene, camera);
+  });
+};
+
 const init = () => {
   var scene = new THREE.Scene();
 
   var box = getBox(1, 1, 1);
   var plane = getPlane(4);
+  plane.name = "plane-1";
 
   //position the center of the box so that it sits on the plane
-  box.position.y = box.geometry.parameters.height / 2;
+
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
 
-  scene.add(box);
   scene.add(plane);
+  plane.add(box);
+  box.position.y = box.geometry.parameters.height / 2;
 
   var camera = new THREE.PerspectiveCamera(
     45,
@@ -46,7 +65,10 @@ const init = () => {
   var renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("webgl").appendChild(renderer.domElement);
-  renderer.render(scene, camera);
+  update(renderer, scene, camera);
+  //   renderer.render(scene, camera);
+
+  return scene;
 };
 
-init();
+const scene = init();
