@@ -57,6 +57,11 @@ const getPointLight = (intensity) => {
   return light;
 };
 
+const getAmbientLight = (intensity) => {
+  var light = new THREE.AmbientLight("rgb(10,30,50)", intensity);
+  return light;
+};
+
 const getSpotLight = (intensity) => {
   var light = new THREE.SpotLight(0xffffff, intensity);
   light.castShadow = true;
@@ -77,18 +82,26 @@ const getDirectionalLight = (intensity) => {
 };
 
 //recursively call itself so as to allow for interactivity
-const update = (renderer, scene, camera, controls) => {
+const update = (renderer, scene, camera, controls, clock) => {
   renderer.render(scene, camera);
+  var timeElapsed = clock.getElapsedTime();
 
+  var boxGrid = scene.getObjectByName("boxGrid");
+  boxGrid.children.forEach((child, index) => {
+    child.scale.y = (Math.sin(timeElapsed * 5 + index) + 1) / 2 + 0.001;
+    child.position.y = child.scale.y / 2;
+  });
   controls.update();
+
   requestAnimationFrame(() => {
-    update(renderer, scene, camera, controls);
+    update(renderer, scene, camera, controls, clock);
   });
 };
 
 const init = () => {
   var scene = new THREE.Scene();
   var gui = new dat.GUI();
+  var clock = new THREE.Clock();
 
   var enableFog = false;
   if (enableFog) {
@@ -98,15 +111,19 @@ const init = () => {
   var plane = getPlane(30);
   var spotLight = getSpotLight(1);
   var directionalLight = getDirectionalLight(1);
+
   var sphere = getSphere(0.05);
   var boxGrid = getBoxGrid(10, 1.5);
+  boxGrid.name = "boxGrid";
   //the shadows are cast by a 'shadow camera', which has its own field of view which may not be sufficient
   var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
   plane.name = "plane-1";
 
   //need this math to communicate in degrees rather than radiants
   plane.rotation.x = Math.PI / 2;
-  directionalLight.position.y = 4;
+  directionalLight.position.x = 13;
+  directionalLight.position.y = 10;
+  directionalLight.position.z = 10;
   directionalLight.intensity = 2;
 
   gui.add(directionalLight, "intensity", 0, 10);
@@ -117,6 +134,7 @@ const init = () => {
 
   scene.add(plane);
   scene.add(directionalLight);
+
   scene.add(boxGrid);
   directionalLight.add(sphere);
   scene.add(helper);
@@ -141,7 +159,7 @@ const init = () => {
 
   var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  update(renderer, scene, camera, controls);
+  update(renderer, scene, camera, controls, clock);
 
   return scene;
 };
