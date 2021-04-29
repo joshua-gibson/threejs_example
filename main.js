@@ -127,12 +127,6 @@ const init = () => {
   directionalLight.position.z = 10;
   directionalLight.intensity = 2;
 
-  gui.add(directionalLight, "intensity", 0, 10);
-  gui.add(directionalLight.position, "y", 0, 20);
-  gui.add(directionalLight.position, "x", 0, 20);
-  gui.add(directionalLight.position, "z", 0, 20);
-  // gui.add(directionalLight, "penumbra", 0, 1);
-
   scene.add(plane);
   scene.add(directionalLight);
 
@@ -146,9 +140,19 @@ const init = () => {
     1,
     1000
   );
-  camera.position.z = 5;
-  camera.position.x = 1;
-  camera.position.y = 2;
+
+  var cameraZPosition = new THREE.Group();
+  var cameraXRotation = new THREE.Group();
+  var cameraYRotation = new THREE.Group();
+
+  cameraZPosition.add(camera);
+  cameraXRotation.add(cameraZPosition);
+  cameraYRotation.add(cameraXRotation);
+  scene.add(cameraYRotation);
+
+  gui.add(cameraZPosition.position, "z", 0, 100);
+  gui.add(cameraYRotation.rotation, "y", -Math.PI, Math.PI);
+  gui.add(cameraXRotation.rotation, "x", -Math.PI, Math.PI);
 
   camera.lookAt(new THREE.Vector3(0, 0, 0)); //look at the center of the scene
 
